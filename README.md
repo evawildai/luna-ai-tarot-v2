@@ -57,7 +57,34 @@ npm run build   # клиент → dist/, сервер → dist/server.cjs (бе
 npm start       # NODE_ENV=production, слушает process.env.PORT
 ```
 
-## Безопасность
+## Деплой на VPS (текущий контур)
+
+Сервер: Ubuntu 26.04, `5.129.214.176`. Доступ — только по SSH-ключу под пользователем `glm` (root-вход отключён); ключи и реквизиты лежат локально в `vps-access/` и в git не попадают.
+
+| | v1 (не трогаем) | v2 (этот репозиторий) |
+|---|---|---|
+| Код на сервере | `/root/app` | `/root/app-v2` |
+| Процесс | pm2 `luna-tarot` | pm2 `luna-v2` |
+| Порт | 127.0.0.1:3000 | 127.0.0.1:47321 |
+| Домен | `lunalis.ru`, `myluna.ru` | `v2.lunalis.ru` (нужна A-запись → 5.129.214.176) |
+
+Оба Node-сервера слушают только `127.0.0.1` — наружу отдаёт nginx (80/443, Let's Encrypt). Python-бэкенд Mini App (`/opt/luna-ai-py`, systemd `luna-ai`, порт 8000) общий и относится к v1.
+
+Обновление v2 на сервере:
+
+```bash
+ssh -i vps-access/id_ed25519_glm_vps glm@5.129.214.176
+cd /root/app-v2 && sudo git pull && sudo npm run build && sudo pm2 restart luna-v2
+```
+
+## Защита сервера
+
+- **ufw active**: снаружи только 22 (LIMIT — rate-limit подключений), 80, 443.
+- **fail2ban**: jail `sshd` — бан после 5 неудачных попыток за 10 минут (1 час, с эскалацией).
+- **SSH**: вход только по ключу (`passwordauthentication no`), `PermitRootLogin no`, OpenSSH 10.2p1.
+- Node-приложения и Python-бэкенд не торчат в интернет напрямую — только через nginx.
+
+## Безопасность приложения
 
 - Все вызовы Gemini выполняются на сервере — API-ключи не попадают в клиентский бандл.
 - `POST /api/telegram/set-token` защищён: при заданном `ADMIN_SECRET` запрос должен содержать заголовок `x-admin-secret`; без секрета эндпоинт принимает запросы только с localhost.
