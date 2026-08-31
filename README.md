@@ -81,7 +81,7 @@ cd /root/app-v2 && sudo git pull && sudo npm run build && sudo pm2 restart luna-
 
 - **ufw active**: снаружи только 22 (LIMIT — rate-limit подключений), 80, 443.
 - **fail2ban**: jail `sshd` — бан после 5 неудачных попыток за 10 минут (1 час, с эскалацией).
-- **SSH**: вход только по ключу (`passwordauthentication no`), `PermitRootLogin no`, OpenSSH 10.2p1.
+- **SSH**: вход только по ключу (`passwordauthentication no`), `PermitRootLogin no`, OpenSSH 10.2p1. Приватный ключ защищён passphrase (хранится в менеджере паролей владельца, не в репозитории).
 - Node-приложения и Python-бэкенд не торчат в интернет напрямую — только через nginx.
 
 ## Безопасность приложения
