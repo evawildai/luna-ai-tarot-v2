@@ -688,7 +688,9 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  // Только localhost: наружу сервер доступен через nginx (80/443).
+  // Прямой доступ извне к порту открывает бэкенд в обход SSL и лимитов.
+  app.listen(PORT, "127.0.0.1", () => {
     console.log(`AI Tarot & MAC Server running on http://localhost:${PORT}`);
   });
 }
