@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>МАК-коуч — LUNA AI</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/luna.css" />
+</head>
+<body>
+  <main style="margin-top: 4vh">
+    <section class="luna-card">
+      <p class="text-xs tracking-widest uppercase luna-accent">МАК-коуч</p>
+      <h1 class="luna-title text-xl mt-1 mb-2">Метафорическая карта</h1>
+      <p class="text-sm text-[#8a8a9a]">Вытяните карту и ответьте на её вопросы — по одному. В конце Луна отзеркалит ваши ответы.</p>
+      <button class="luna-btn w-full mt-4" id="draw-btn">Вытянуть карту 🧩</button>
+    </section>
+
+    <section id="session" class="hidden">
+      <div class="luna-card">
+        <p class="luna-title text-lg" id="card-title">—</p>
+        <p class="text-xs luna-accent" id="card-category"></p>
+        <p class="text-sm mt-2" id="card-metaphor"></p>
+        <p class="text-sm text-[#8a8a9a] mt-1" id="card-desc"></p>
+      </div>
+
+      <div class="luna-card">
+        <p class="text-xs tracking-widest uppercase luna-accent">
+          Вопрос <span id="q-num">1</span> из <span id="q-total">3</span>
+        </p>
+        <p class="luna-title mt-2" id="question"></p>
+        <textarea class="luna-input mt-3" id="answer" rows="3" placeholder="Ответьте честно, как откликается…"></textarea>
+        <button class="luna-btn w-full mt-3" id="next-btn">Ответить</button>
+      </div>
+
+      <div id="mirror" class="hidden luna-card">
+        <p class="text-xs tracking-widest uppercase luna-accent">Зеркало Лун</p>
+        <p class="text-sm mt-2 whitespace-pre-line" id="mirror-text"></p>
+        <button class="luna-btn luna-btn--ghost w-full mt-3" id="restart-btn">Новая сессия</button>
+      </div>
+
+      <div id="self-analysis" class="hidden luna-card">
+        <p class="text-xs tracking-widest uppercase luna-accent">Самоанализ</p>
+        <div id="sa-history" class="mt-2 text-sm space-y-2"></div>
+        <div id="sa-suggestions" class="flex flex-wrap gap-2 mt-3"></div>
+        <textarea class="luna-input mt-3" id="sa-input" rows="3" placeholder="Что откликается дальше?"></textarea>
+        <button class="luna-btn w-full mt-3" id="sa-send">Отправить</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/tg.js"></script>
+  <script src="/static/js/luna.js"></script>
+  <script>
+    let card = null;
+    let questions = [];
+    let answers = [];
+
+    document.getElementById('draw-btn').addEventListener('click', async () => {
+      const res = await fetch('/api/draw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...window.lunaHeaders() },
+        body: JSON.stringify({ deck: 'mac' }),
+      });
+      card = await res.json();
+      questions = card.guidingQuestions || [];
+      answers = [];
+      document.getElementById('session').classList.remove('hidden');
+      document.getElementById('mirror').classList.add('hidden');
+      document.getElementById('card-title').textContent = card.title;
+      document.getElementById('card-category').textContent = card.category;
+      document.getElementById('card-metaphor').textContent = card.metaphor;
+      document.getElementById('card-desc').textContent = card.description;
+      document.getElementById('q-total').textContent = questions.length;
+      showQuestion();
+      document.getElementById('session').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    function showQuestion() {
+      document.getElementById('q-num').textContent = answers.length + 1;
+      document.getElementById('question').textContent = questions[answers.length];
+      document.getElementById('answer').value = '';
+    }
+
+    document.getElementById('next-btn').addEventListener('click', async (e) => {
+      const btn = document.getElementById('next-btn');
+      const value = document.getElementById('answer').value.trim();
+      if (!value) return;
+      answers.push(value);
+      btn.disabled = true;
+      try {
+        if (answers.length < questions.length) {
+          showQuestion();
+        } else {
+          const res = await fetch('/api/mac/reflect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...window.lunaHeaders() },
+            body: JSON.stringify({ card_id: card.id, answers }),
+          });
+          const body = await res.json();
+          document.getElementById('mirror-text').textContent = body.reply +
+            (body.ai ? '' : '\n\n(Локальный режим: без AI — карты говорят напрямую)');
+          document.getElementById('mirror').classList.remove('hidden');
+          document.getElementById('mirror').scrollIntoView({ behavior: 'smooth' });
+          // После зеркала открываем диалог самоанализа по этой же карте.
+          saHistory = questions.map((q, i) => ({ sender: 'user', text: answers[i] }));
+          document.getElementById('sa-history').innerHTML = '';
+          document.getElementById('sa-suggestions').innerHTML = '';
+          document.getElementById('self-analysis').classList.remove('hidden');
+        }
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      document.getElementById('session').classList.add('hidden');
+      document.getElementById('self-analysis').classList.add('hidden');
+      document.getElementById('draw-btn').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Самоанализ: диалог с психологом-коучем по той же МАК-карте.
+    let saHistory = [];
+
+    function saBubble(sender, text) {
+      saHistory.push({ sender, text });
+      const p = document.createElement('p');
+      p.className = sender === 'user' ? 'text-[#8a8a9a]' : 'luna-title';
+      p.textContent = (sender === 'user' ? 'Вы: ' : '🌙 ') + text;
+      document.getElementById('sa-history').appendChild(p);
+    }
+
+    function saSuggestions(list) {
+      const wrap = document.getElementById('sa-suggestions');
+      wrap.innerHTML = '';
+      (list || []).forEach(s => {
+        const b = document.createElement('button');
+        b.className = 'luna-btn luna-btn--ghost !py-1.5 !px-3 text-xs';
+        b.textContent = s;
+        b.addEventListener('click', () => {
+          document.getElementById('sa-input').value = s;
+        });
+        wrap.appendChild(b);
+      });
+    }
+
+    document.getElementById('sa-send').addEventListener('click', async () => {
+      const btn = document.getElementById('sa-send');
+      const input = document.getElementById('sa-input');
+      const value = input.value.trim();
+      if (!value || !card) return;
+      btn.disabled = true;
+      input.value = '';
+      saBubble('user', value);
+      try {
+        const res = await fetch('/api/self-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...window.lunaHeaders() },
+          body: JSON.stringify({ card_id: card.id, user_message: value, history: saHistory.slice(0, -1) }),
+        });
+        const body = await res.json();
+        saBubble('ai', body.replyText || '…');
+        saSuggestions(body.suggestedFollowUps);
+        document.getElementById('sa-send').scrollIntoView({ behavior: 'smooth' });
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

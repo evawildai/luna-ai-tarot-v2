@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Натальная карта — LUNA AI</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/luna.css" />
+</head>
+<body>
+  <main style="margin-top: 4vh">
+    <section class="luna-card">
+      <p class="text-xs tracking-widest uppercase luna-accent">Натальная карта</p>
+      <h1 class="luna-title text-xl mt-1 mb-4">Большая тройка</h1>
+
+      <form id="natal-form" class="space-y-4">
+        <div>
+          <label class="block text-xs text-[#8a8a9a] mb-1" for="birth_date">Дата рождения *</label>
+          <input class="luna-input" type="date" id="birth_date" required />
+        </div>
+        <div>
+          <label class="block text-xs text-[#8a8a9a] mb-1" for="birth_time">Время рождения (необязательно)</label>
+          <input class="luna-input" type="time" id="birth_time" />
+        </div>
+        <div>
+          <label class="block text-xs text-[#8a8a9a] mb-1" for="city">Город рождения *</label>
+          <input class="luna-input" type="text" id="city" placeholder="Москва" required />
+        </div>
+        <button type="submit" class="luna-btn w-full" id="submit-btn">Рассчитать ✨</button>
+        <p id="error" class="text-sm text-red-400 hidden"></p>
+      </form>
+    </section>
+
+    <section id="result" class="hidden">
+      <div class="grid grid-cols-3 gap-3 max-w-[520px] mx-auto mb-4">
+        <div class="luna-card !p-4 text-center">
+          <p class="text-3xl" id="sun-symbol">☉</p>
+          <p class="luna-title mt-1" id="sun-sign">—</p>
+          <p class="text-xs text-[#8a8a9a]">Солнце</p>
+        </div>
+        <div class="luna-card !p-4 text-center">
+          <p class="text-3xl" id="moon-symbol">☽</p>
+          <p class="luna-title mt-1" id="moon-sign">—</p>
+          <p class="text-xs text-[#8a8a9a]">Луна</p>
+        </div>
+        <div class="luna-card !p-4 text-center">
+          <p class="text-3xl" id="asc-symbol">↑</p>
+          <p class="luna-title mt-1" id="asc-sign">—</p>
+          <p class="text-xs text-[#8a8a9a]">Асцендент</p>
+        </div>
+      </div>
+
+      <div class="luna-card hidden" id="note-card">
+        <p class="text-sm luna-accent" id="note-text"></p>
+      </div>
+
+      <div class="luna-card">
+        <p class="text-xs tracking-widest uppercase luna-accent">Камни по Солнцу</p>
+        <p class="luna-title mt-1" id="stone-sun-name">—</p>
+        <p class="text-sm text-[#8a8a9a]" id="stone-sun-meaning"></p>
+      </div>
+      <div class="luna-card">
+        <p class="text-xs tracking-widest uppercase luna-accent">Камни по Луне</p>
+        <p class="luna-title mt-1" id="stone-moon-name">—</p>
+        <p class="text-sm text-[#8a8a9a]" id="stone-moon-meaning"></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/tg.js"></script>
+  <script src="/static/js/luna.js"></script>
+  <script>
+    document.getElementById('natal-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const err = document.getElementById('error');
+      err.classList.add('hidden');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/natal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...window.lunaHeaders() },
+          body: JSON.stringify({
+            birth_date: document.getElementById('birth_date').value,
+            birth_time: document.getElementById('birth_time').value || null,
+            city: document.getElementById('city').value,
+          }),
+        });
+        const body = await res.json();
+        if (!res.ok) throw new Error(body.detail || 'Ошибка расчёта');
+        render(body);
+      } catch (ex) {
+        err.textContent = ex.message;
+        err.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    function render(r) {
+      document.getElementById('result').classList.remove('hidden');
+      const fill = (prefix, obj) => {
+        document.getElementById(prefix + '-sign').textContent = obj ? obj.position : '—';
+        document.getElementById(prefix + '-symbol').textContent = obj ? obj.symbol : '—';
+      };
+      fill('sun', r.sun);
+      fill('moon', r.moon);
+      fill('asc', r.ascendant);
+      const noteCard = document.getElementById('note-card');
+      const note = [r.note, r.tz_note].filter(Boolean).join(' ');
+      noteCard.classList.toggle('hidden', !note);
+      if (note) document.getElementById('note-text').textContent = '☝ ' + note;
+      document.getElementById('stone-sun-name').textContent =
+        r.stones.sun.symbol + ' ' + r.stones.sun.stone + ' (' + r.stones.sun.sign + ')';
+      document.getElementById('stone-sun-meaning').textContent = r.stones.sun.meaning;
+      document.getElementById('stone-moon-name').textContent =
+        r.stones.moon.symbol + ' ' + r.stones.moon.stone + ' (' + r.stones.moon.sign + ')';
+      document.getElementById('stone-moon-meaning').textContent = r.stones.moon.meaning;
+      document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

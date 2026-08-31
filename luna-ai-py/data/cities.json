@@ -1,0 +1,206 @@
+{
+  "москва": {
+    "name": "Москва",
+    "lat": 55.7558,
+    "lon": 37.6173,
+    "tz": "Europe/Moscow"
+  },
+  "санкт-петербург": {
+    "name": "Санкт-Петербург",
+    "lat": 59.9311,
+    "lon": 30.3609,
+    "tz": "Europe/Moscow"
+  },
+  "новосибирск": {
+    "name": "Новосибирск",
+    "lat": 55.0084,
+    "lon": 82.9357,
+    "tz": "Asia/Novosibirsk"
+  },
+  "екатеринбург": {
+    "name": "Екатеринбург",
+    "lat": 56.8389,
+    "lon": 60.6057,
+    "tz": "Asia/Yekaterinburg"
+  },
+  "казань": {
+    "name": "Казань",
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "tz": "Europe/Moscow"
+  },
+  "нижний новгород": {
+    "name": "Нижний Новгород",
+    "lat": 56.2965,
+    "lon": 43.9361,
+    "tz": "Europe/Moscow"
+  },
+  "челябинск": {
+    "name": "Челябинск",
+    "lat": 55.1644,
+    "lon": 61.4368,
+    "tz": "Asia/Yekaterinburg"
+  },
+  "самара": {
+    "name": "Самара",
+    "lat": 53.1959,
+    "lon": 50.1002,
+    "tz": "Europe/Samara"
+  },
+  "ростов-на-дону": {
+    "name": "Ростов-на-Дону",
+    "lat": 47.2357,
+    "lon": 39.7015,
+    "tz": "Europe/Moscow"
+  },
+  "уфа": {
+    "name": "Уфа",
+    "lat": 54.7388,
+    "lon": 55.9721,
+    "tz": "Asia/Yekaterinburg"
+  },
+  "красноярск": {
+    "name": "Красноярск",
+    "lat": 56.0153,
+    "lon": 92.8932,
+    "tz": "Asia/Krasnoyarsk"
+  },
+  "воронеж": {
+    "name": "Воронеж",
+    "lat": 51.672,
+    "lon": 39.1843,
+    "tz": "Europe/Moscow"
+  },
+  "волгоград": {
+    "name": "Волгоград",
+    "lat": 48.708,
+    "lon": 44.5133,
+    "tz": "Europe/Volgograd"
+  },
+  "краснодар": {
+    "name": "Краснодар",
+    "lat": 45.0355,
+    "lon": 38.9753,
+    "tz": "Europe/Moscow"
+  },
+  "сочи": {
+    "name": "Сочи",
+    "lat": 43.5855,
+    "lon": 39.7231,
+    "tz": "Europe/Moscow"
+  },
+  "калининград": {
+    "name": "Калининград",
+    "lat": 54.7104,
+    "lon": 20.4522,
+    "tz": "Europe/Kaliningrad"
+  },
+  "владивосток": {
+    "name": "Владивосток",
+    "lat": 43.1155,
+    "lon": 131.8855,
+    "tz": "Asia/Vladivostok"
+  },
+  "иркутск": {
+    "name": "Иркутск",
+    "lat": 52.287,
+    "lon": 104.305,
+    "tz": "Asia/Irkutsk"
+  },
+  "минск": {
+    "name": "Минск",
+    "lat": 53.9006,
+    "lon": 27.559,
+    "tz": "Europe/Minsk"
+  },
+  "алматы": {
+    "name": "Алматы",
+    "lat": 43.222,
+    "lon": 76.8512,
+    "tz": "Asia/Almaty"
+  },
+  "астана": {
+    "name": "Астана",
+    "lat": 51.1694,
+    "lon": 71.4491,
+    "tz": "Asia/Almaty"
+  },
+  "киев": {
+    "name": "Киев",
+    "lat": 50.4501,
+    "lon": 30.5234,
+    "tz": "Europe/Kyiv"
+  },
+  "тбилиси": {
+    "name": "Тбилиси",
+    "lat": 41.7151,
+    "lon": 44.8271,
+    "tz": "Asia/Tbilisi"
+  },
+  "ереван": {
+    "name": "Ереван",
+    "lat": 40.1792,
+    "lon": 44.4991,
+    "tz": "Asia/Yerevan"
+  },
+  "баку": {
+    "name": "Баку",
+    "lat": 40.4093,
+    "lon": 49.8671,
+    "tz": "Asia/Baku"
+  },
+  "ташкент": {
+    "name": "Ташкент",
+    "lat": 41.2995,
+    "lon": 69.2401,
+    "tz": "Asia/Tashkent"
+  },
+  "лондон": {
+    "name": "London",
+    "lat": 51.5074,
+    "lon": -0.1278,
+    "tz": "Europe/London"
+  },
+  "нью-йорк": {
+    "name": "New York",
+    "lat": 40.7128,
+    "lon": -74.006,
+    "tz": "America/New_York"
+  },
+  "берлин": {
+    "name": "Berlin",
+    "lat": 52.52,
+    "lon": 13.405,
+    "tz": "Europe/Berlin"
+  },
+  "париж": {
+    "name": "Paris",
+    "lat": 48.8566,
+    "lon": 2.3522,
+    "tz": "Europe/Paris"
+  },
+  "стамбул": {
+    "name": "Istanbul",
+    "lat": 41.0082,
+    "lon": 28.9784,
+    "tz": "Europe/Istanbul"
+  },
+  "дубай": {
+    "name": "Dubai",
+    "lat": 25.2048,
+    "lon": 55.2708,
+    "tz": "Asia/Dubai"
+  },
+  "тель-авив": {
+    "name": "Tel Aviv",
+    "lat": 32.0853,
+    "lon": 34.7818,
+    "tz": "Asia/Jerusalem"
+  },
+  "пермь": {
+    "name": "Пермь",
+    "lat": 58.0105,
+    "lon": 56.2502,
+    "tz": "Asia/Yekaterinburg"
+  }
+}

@@ -1,0 +1,323 @@
+:root {
+  --bg: #050507;
+  --card: #0d0d14;
+  --accent: #8b5cf6;
+  --accent-soft: #a78bfa;
+  --silver: #c0c0d0;
+  --silver-dim: #8a8a9a;
+  --glow: 0 0 24px rgba(139, 92, 246, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(1200px 800px at 50% -10%, #1a1030 0%, var(--bg) 55%);
+  color: var(--silver);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  padding: 16px;
+}
+
+.luna-card {
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.08), rgba(13, 13, 20, 0.9));
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--glow);
+  max-width: 520px;
+  margin: 0 auto 16px;
+}
+
+.luna-title {
+  color: #e6e6f0;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.luna-accent { color: var(--accent-soft); }
+
+.luna-btn {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: var(--glow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.luna-btn:hover { transform: translateY(-1px); box-shadow: 0 0 32px rgba(139, 92, 246, 0.5); }
+.luna-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+.luna-btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: var(--accent-soft);
+  box-shadow: none;
+}
+
+.luna-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  color: #e6e6f0;
+  padding: 10px 12px;
+  font-size: 15px;
+}
+.luna-input:focus { outline: none; border-color: var(--accent-soft); }
+
+a { color: var(--accent-soft); }
+
+/* Карта дня */
+.drawn-card {
+  perspective: 800px;
+  max-width: 240px;
+  margin: 16px auto;
+}
+.drawn-card__inner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 5;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+.drawn-card.is-flipped .drawn-card__inner { transform: rotateY(180deg); }
+.drawn-card__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  text-align: center;
+}
+.drawn-card__back {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(139, 92, 246, 0.45), transparent 60%),
+    linear-gradient(160deg, #17111f, #0b0910);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  font-size: 44px;
+  color: var(--accent-soft);
+}
+.drawn-card__front {
+  transform: rotateY(180deg);
+  background: linear-gradient(170deg, rgba(139, 92, 246, 0.22), #0d0b14 70%);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  box-shadow: var(--glow);
+}
+.drawn-card.is-shuffling { animation: shuffle 0.45s ease infinite alternate; }
+@keyframes shuffle {
+  from { transform: rotate(-2deg) translateY(0); }
+  to { transform: rotate(2deg) translateY(-6px); }
+}
+
+/* Рубашка карты — спираль-арт */
+.spiral {
+  width: 68%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 0deg,
+      transparent 0deg, var(--accent-soft) 40deg, transparent 80deg,
+      rgba(139, 92, 246, 0.7) 130deg, transparent 170deg,
+      var(--accent) 230deg, transparent 280deg,
+      rgba(167, 139, 250, 0.8) 330deg, transparent 360deg),
+    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.35), transparent 70%);
+  mask: radial-gradient(circle, transparent 0 12%, #000 13% 22%, transparent 23% 30%, #000 31% 42%, transparent 43% 52%, #000 53% 66%, transparent 67% 78%, #000 79% 92%, transparent 93%);
+  -webkit-mask: radial-gradient(circle, transparent 0 12%, #000 13% 22%, transparent 23% 30%, #000 31% 42%, transparent 43% 52%, #000 53% 66%, transparent 67% 78%, #000 79% 92%, transparent 93%);
+  animation: spiral-spin 14s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.55));
+}
+@keyframes spiral-spin { to { transform: rotate(360deg); } }
+
+/* Тасовка: покачивание + пульс свечения */
+.drawn-card.is-shuffling .drawn-card__inner,
+.ritual-card.is-shuffling { animation: shuffle 0.3s ease infinite alternate; }
+.drawn-card.is-shuffling .drawn-card__back::after,
+.ritual-card.is-shuffling::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 20px;
+  box-shadow: 0 0 26px rgba(139, 92, 246, 0.6);
+  animation: glow-pulse 0.6s ease infinite alternate;
+  pointer-events: none;
+}
+@keyframes glow-pulse { from { opacity: 0.4; } to { opacity: 1; } }
+
+/* Хедер навигации */
+.luna-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 1040px;
+  margin: 0 auto 8px;
+  padding: 10px 14px;
+  background: rgba(5, 5, 7, 0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  border-radius: 16px;
+}
+.luna-header__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #e6e6f0;
+  text-decoration: none;
+  text-shadow: 0 0 14px rgba(139, 92, 246, 0.55);
+}
+.luna-header__btn {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  background: transparent;
+  color: var(--accent-soft);
+  font-size: 17px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.luna-header__btn:hover { box-shadow: 0 0 16px rgba(139, 92, 246, 0.4); }
+
+/* Тост */
+.luna-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%) translateY(16px);
+  background: rgba(13, 13, 20, 0.95);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  border-radius: 14px;
+  color: #e6e6f0;
+  padding: 10px 18px;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 90;
+}
+.luna-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Share-шит */
+.luna-sheet { position: fixed; inset: 0; z-index: 80; }
+.luna-sheet__backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6); }
+.luna-sheet__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 520px;
+  margin: 0 auto;
+  background: var(--card);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 20px 20px 0 0;
+  padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+  animation: sheet-up 0.25s ease;
+}
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+/* Ритуал расклада: карточные фреймы в модалке */
+.ritual-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(3, 3, 6, 0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 20px;
+}
+.ritual-title { color: var(--accent-soft); letter-spacing: 0.1em; font-size: 13px; text-transform: uppercase; }
+.ritual-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.ritual-card {
+  perspective: 800px;
+  width: 96px;
+  aspect-ratio: 3 / 5;
+  position: relative;
+  opacity: 0;
+  transform: translateY(18px) scale(0.92);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.ritual-card.is-dealt { opacity: 1; transform: translateY(0) scale(1); }
+.ritual-card__inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  cursor: pointer;
+}
+.ritual-card.is-flipped .ritual-card__inner { transform: rotateY(180deg); }
+.ritual-card__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  text-align: center;
+}
+.ritual-card__back {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(139, 92, 246, 0.45), transparent 60%),
+    linear-gradient(160deg, #17111f, #0b0910);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+}
+.ritual-card__back .spiral { width: 72%; }
+.ritual-card__front {
+  transform: rotateY(180deg);
+  background: linear-gradient(170deg, rgba(139, 92, 246, 0.22), #0d0b14 70%);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  box-shadow: var(--glow);
+  gap: 4px;
+}
+.ritual-card__glyph { font-size: 26px; }
+.ritual-card__name {
+  color: #e6e6f0;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.ritual-card__rev { font-size: 9px; color: var(--silver-dim); }
+.ritual-card:not(.is-flipped):hover { transform: translateY(-3px); }
+
+/* Десктоп ≥900px: широкий контейнер, сетки, хедер-навигация. Мобильный вид не трогаем. */
+@media (min-width: 900px) {
+  body { padding: 24px 32px 48px; }
+  main { max-width: 1020px; margin: 0 auto; }
+
+  /* /today: слева Луна+камень (две секции), справа карта дня (span 2 строки) */
+  .today-main { display: grid; grid-template-columns: 1fr 1.2fr; gap: 4px 24px; align-items: start; }
+  .today-main > .luna-card:nth-child(3) { grid-column: 2; grid-row: 1 / span 2; }
+
+  /* Список раскладов — 2 колонки */
+  #spreads { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Результат расклада — 2 колонки */
+  #result:not(.hidden) { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  #result .luna-card:first-child { grid-column: 1 / -1; }
+
+  /* Карточки в сетке не растягиваются сверх разумного */
+  .luna-card { max-width: none; }
+  main > .luna-card:not(:has(#moon-title)):not(:has(#spreads)) { max-width: 720px; }
+}

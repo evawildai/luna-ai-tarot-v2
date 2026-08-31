@@ -1,0 +1,16 @@
+[Unit]
+Description=LUNA AI — регистрация Telegram webhook (set_webhook + secret_token)
+After=luna-ai.service
+Wants=luna-ai.service
+
+[Service]
+Type=oneshot
+User=www-data
+WorkingDirectory=/opt/luna-ai-py
+EnvironmentFile=/opt/luna-ai-py/.env
+# WEBAPP_URL уже задан в .env; вебхук = https://домен/telegram/webhook
+ExecStart=/opt/luna-ai-py/venv/bin/python bot.py
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

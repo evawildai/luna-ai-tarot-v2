@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>LUNA AI</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/luna.css?v=3" />
+</head>
+<body>
+  <main style="margin-top: 6vh">
+    <section class="luna-card" style="text-align: center">
+      <p class="text-sm tracking-widest uppercase luna-accent">LUNA AI</p>
+      <h1 class="luna-title text-lg mt-2">Таро, МАК и психология — без страха и фатализма 🌙</h1>
+    </section>
+
+    <section class="luna-card" style="text-align: center">
+      <p class="text-xs tracking-widest uppercase luna-accent">Сегодня</p>
+      <button id="open-card" class="card-breath card-lift welcome-card" aria-label="Открыть карту дня">
+        <span class="welcome-card__moon">🌙</span>
+        <span class="welcome-card__label">Открыть карту 🌙</span>
+      </button>
+      <p class="card-hint" id="card-hint">✨ нажми на карту</p>
+      <p class="text-xs text-[#8a8a9a] mt-3">Карта дня, расклады и МАК — бесплатно и без регистрации</p>
+      <nav class="mt-3 space-x-4 text-sm">
+        <a href="/spreads" class="luna-accent no-underline">🃏 Расклады</a>
+        <a href="/mac" class="luna-accent no-underline">🧩 МАК</a>
+        <a href="/today" class="luna-accent no-underline">🌙 Сегодня</a>
+      </nav>
+    </section>
+  </main>
+
+  <script src="/static/js/tg.js"></script>
+  <script src="/static/js/gate.js"></script>
+  <script>
+    window.lunaLogEvent('welcome_shown');
+
+    // Разовая подсказка под картой: пульс, исчезает после тапа или через 4 с.
+    // На первый показ за сессию усиливаем «дыхание» карты, чтобы взгляд цеплялся за центр.
+    const hint = document.getElementById('card-hint');
+    const card = document.getElementById('open-card');
+    let hintGone = false;
+    function hideHint() {
+      if (hintGone) return;
+      hintGone = true;
+      hint.classList.remove('is-visible');
+      card.classList.remove('card-breath--strong');
+    }
+    if (!sessionStorage.getItem('luna_spark_shown')) {
+      sessionStorage.setItem('luna_spark_shown', '1');
+      hint.classList.add('is-visible');
+      card.classList.add('card-breath--strong');
+      setTimeout(hideHint, 4000);
+    } else {
+      hint.remove();
+    }
+    card.addEventListener('click', hideHint);
+
+    document.getElementById('open-card').addEventListener('click', () => {
+      if (window.LUNA_TG && window.LUNA_TG.HapticFeedback) {
+        window.LUNA_TG.HapticFeedback.impactOccurred('light');
+      }
+      location.href = '/today';
+    });
+  </script>
+</body>
+</html>

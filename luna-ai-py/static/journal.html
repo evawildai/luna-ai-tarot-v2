@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Дневник — LUNA AI</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/luna.css" />
+</head>
+<body>
+  <main style="margin-top: 4vh">
+    <section class="luna-card">
+      <p class="text-xs tracking-widest uppercase luna-accent">Дневник инсайтов</p>
+      <h1 class="luna-title text-xl mt-1">Ваша история</h1>
+      <p id="guest-note" class="text-sm text-[#8a8a9a] mt-2 hidden">Вы в гостевом режиме — история хранится локально и появится после входа через Telegram.</p>
+      <div id="entries" class="mt-4 space-y-3"></div>
+    </section>
+  </main>
+
+  <script src="/static/js/tg.js"></script>
+  <script src="/static/js/luna.js"></script>
+  <script>
+    fetch('/api/journal', { headers: window.lunaHeaders() })
+      .then(r => r.json())
+      .then(data => {
+        if (data.guest) document.getElementById('guest-note').classList.remove('hidden');
+        const box = document.getElementById('entries');
+        if (!data.entries || !data.entries.length) {
+          box.innerHTML = '<p class="text-sm text-[#8a8a9a]">Пока пусто. Вытяните карту дня — и история начнётся.</p>';
+          return;
+        }
+        data.entries.forEach(e => {
+          const el = document.createElement('div');
+          el.className = 'border rounded-xl p-3';
+          el.style.borderColor = 'rgba(139,92,246,0.25)';
+          el.innerHTML = `<p class="text-sm luna-title">${e.title}${e.detail ? ` — <span class="text-[#c0c0d0]">${e.detail}</span>` : ''}</p>
+            <p class="text-xs text-[#8a8a9a] mt-1">${e.ts.replace('T', ' ')}</p>`;
+          box.appendChild(el);
+        });
+      });
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Отчёт: бот LunaTarot_ai_bot</title>
+<style>
+  body { background: #0e1621; font-family: "Segoe UI", system-ui, sans-serif; color: #e8eaed; margin: 0; padding: 24px; }
+  h1 { font-size: 20px; color: #8ab4f8; }
+  h2 { font-size: 15px; color: #9aa0a6; margin: 26px 0 10px; }
+  .chat { background: linear-gradient(160deg, #17212b, #0e1621); border-radius: 18px; padding: 18px; max-width: 560px; box-shadow: 0 4px 24px rgba(0,0,0,.5); }
+  .msg { background: #182533; border-radius: 12px 12px 12px 4px; padding: 10px 14px; margin: 8px 0; font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
+  .msg.user { background: #2b5278; border-radius: 12px 12px 4px 12px; margin-left: auto; max-width: 70%; width: fit-content; }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .kb button { background: #212d3b; color: #8ab4f8; border: 1px solid #2f3f52; border-radius: 10px; padding: 8px 14px; font-size: 13px; }
+  .menu-btn { margin-top: 14px; background: #212d3b; border-radius: 10px; padding: 10px; text-align: center; color: #8ab4f8; font-size: 13px; border: 1px solid #2f3f52; }
+</style>
+</head>
+<body>
+<h1>@LunaTarot_ai_bot — UX-фикс /start и автономный режим</h1>
+
+<h2>1. /start — приветствие, возможности, инлайн-клавиатура (без «Открыть LUNA AI»)</h2>
+<div class="chat">
+  <div class="msg">✨ Приветствую тебя, Татьана! 🔮
+
+Я твой персональный ИИ-Таролог и проводник по Метафорическим картам (МАК).
+
+🌟 Что я умею:
+• 🎴 Расклады на любовь, карьеру, развилки выбора
+• 🌅 Ежедневная Карта Дня с глубокой трактовкой
+• 🧩 Метафорические ассоциативные карты для самоанализа
+• ♈ Расчет Аркана Судьбы по дате рождения
+• 💬 Ответы на любые личные волнующие вопросы
+
+Напиши свой вопрос или используй кнопки меню ниже для полного погружения!
+    <div class="kb">
+      <button>🌅 Карта дня</button><button>🔮 Расклад</button>
+      <button>🧩 МАК</button><button>♈ Наталка</button>
+      <button>❓ Помощь</button>
+    </div>
+  </div>
+  <div class="menu-btn">☰ Меню — «Открыть LUNA AI» (постоянная menu-кнопка, единственная дверь в Mini App)</div>
+</div>
+
+<h2>2. /card — карта дня текстом (из локальных данных)</h2>
+<div class="chat">
+  <div class="msg user">/card</div>
+  <div class="msg">🌙 Карта дня: Туз Кубков
+▪ Безусловная любовь · Поток чувств · Интуитивное открытие · Эмпатия · Благодать
+
+Переполняющая чаша любви, эмоциональное обновление, душевное умиротворение и глубокая привязанность.
+
+❓ Готовы ли вы наполнить свое сердце любовью и принять дары чувств?</div>
+</div>
+
+<h2>3. /destiny — дата запрашивается в чате, сохраняется в профиль</h2>
+<div class="chat">
+  <div class="msg user">/destiny</div>
+  <div class="msg">🌙 Чтобы рассчитать вашу Большую тройку, напишите дату рождения в формате ДД.ММ.ГГГГ (например, 21.03.1990) — я сохраню её в профиль.</div>
+  <div class="msg user">01.01.1990</div>
+  <div class="msg">✨ Ваша Большая тройка
+☉ Солнце: 10° Козерог
+☽ Луна: 3° Рыбы
+↑ Асцендент: зависит от времени рождения — укажите его в Mini App для точности
+
+🔮 Бонус — Аркан Судьбы №21: Целостность · Триумф · Завершение круга · Гармония Вселенной · Расширение</div>
+</div>
+</body>
+</html>

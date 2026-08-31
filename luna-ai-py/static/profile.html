@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Профиль — LUNA AI</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/luna.css" />
+</head>
+<body>
+  <main style="margin-top: 4vh">
+    <section class="luna-card">
+      <p class="text-xs tracking-widest uppercase luna-accent">Профиль искателя</p>
+      <h1 class="luna-title text-xl mt-1 mb-4">Данные и тон ответов</h1>
+
+      <p id="guest-note" class="text-sm text-[#8a8a9a] hidden mb-3">Гостевой режим: сохранение профиля появится после входа через Telegram.</p>
+
+      <form id="profile-form" class="space-y-4">
+        <div>
+          <label class="block text-xs text-[#8a8a9a] mb-1" for="birth_date">Дата рождения</label>
+          <input class="luna-input" type="date" id="birth_date" />
+        </div>
+        <div>
+          <label class="block text-xs text-[#8a8a9a] mb-1" for="birth_time">Время рождения</label>
+          <input class="luna-input" type="time" id="birth_time" />
+        </div>
+        <div>
+          <label class="block text-xs text-[#8a8a9a] mb-1" for="city">Город</label>
+          <input class="luna-input" type="text" id="city" placeholder="Москва" />
+        </div>
+        <div>
+          <label class="block text-xs text-[#8a8a9a] mb-2">Тон ответов Лун</label>
+          <div id="tones" class="grid grid-cols-2 gap-2"></div>
+        </div>
+        <button type="submit" class="luna-btn w-full" id="submit-btn">Сохранить</button>
+        <p id="msg" class="text-sm hidden"></p>
+      </form>
+    </section>
+
+    <section class="luna-card">
+      <p class="text-xs tracking-widest uppercase luna-accent">Streak</p>
+      <p class="luna-title text-2xl mt-1"><span id="streak">0</span> <span class="text-sm text-[#8a8a9a]">дней подряд 🔥</span></p>
+    </section>
+
+    <section class="luna-card">
+      <p class="text-xs tracking-widest uppercase luna-accent">Пригласить друзей</p>
+      <p class="text-sm text-[#8a8a9a] mt-1">Реферальная программа появится позже.</p>
+      <p class="luna-title mt-2" id="ref-code">—</p>
+      <button class="luna-btn luna-btn--ghost w-full mt-3" id="copy-ref">Скопировать код</button>
+    </section>
+  </main>
+
+  <script src="/static/js/tg.js"></script>
+  <script src="/static/js/luna.js"></script>
+  <script>
+    let tones = [];
+    let selectedTone = 'мягко';
+
+    async function load() {
+      const res = await fetch('/api/profile', { headers: window.lunaHeaders() });
+      const p = await res.json();
+      if (p.guest) document.getElementById('guest-note').classList.remove('hidden');
+      document.getElementById('birth_date').value = p.birth_date || '';
+      document.getElementById('birth_time').value = p.birth_time || '';
+      document.getElementById('city').value = p.city || '';
+      document.getElementById('streak').textContent = p.streak || 0;
+      document.getElementById('ref-code').textContent = p.referral || '—';
+      tones = p.tones || [];
+      selectedTone = p.tone || 'мягко';
+      renderTones();
+    }
+
+    function renderTones() {
+      const labels = { 'мягко': '🌸 Мягко', 'честно': '⚔ Честно', 'провокативно': '🔥 Провокативно', 'достигатор': '🚀 Достигатор' };
+      const box = document.getElementById('tones');
+      box.innerHTML = '';
+      tones.forEach(t => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'luna-btn ' + (t === selectedTone ? '' : 'luna-btn--ghost') + ' !py-2 !px-3 text-sm';
+        b.textContent = labels[t] || t;
+        b.addEventListener('click', () => { selectedTone = t; renderTones(); });
+        box.appendChild(b);
+      });
+    }
+
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...window.lunaHeaders() },
+        body: JSON.stringify({
+          birth_date: document.getElementById('birth_date').value || null,
+          birth_time: document.getElementById('birth_time').value || null,
+          city: document.getElementById('city').value || null,
+          tone: selectedTone,
+        }),
+      });
+      const body = await res.json();
+      msg.classList.remove('hidden');
+      if (res.ok) { msg.textContent = 'Сохранено ✓'; msg.className = 'text-sm luna-accent'; }
+      else { msg.textContent = body.detail || 'Ошибка'; msg.className = 'text-sm text-red-400'; }
+    });
+
+    document.getElementById('copy-ref').addEventListener('click', () => {
+      navigator.clipboard && navigator.clipboard.writeText(document.getElementById('ref-code').textContent);
+      document.getElementById('copy-ref').textContent = 'Скопировано ✓';
+    });
+
+    load().catch(() => {});
+  </script>
+</body>
+</html>

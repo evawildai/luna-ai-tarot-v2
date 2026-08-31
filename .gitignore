@@ -1,0 +1,23 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+.zcode/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+luna-ai-py/.git/
+luna-ai-py/.git_backup/
+
+# VPS access - never commit
+vps-access/id_ed25519_glm_vps
+vps-access/id_ed25519_glm_vps.pub
+vps-access/README.md

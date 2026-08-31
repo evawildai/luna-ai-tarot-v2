@@ -1,0 +1,6 @@
+{
+  "name": "AI Таролог & МАК-карты — Telegram Бот",
+  "description": "Интерактивный ИИ-таролог и проводник по метафорическим ассоциативным картам (МАК) с персональными раскладами, картой дня, глубоким психологическим самоанализом и поддержкой Telegram.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

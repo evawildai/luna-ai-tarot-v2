@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Сегодня — LUNA AI</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/luna.css" />
+</head>
+<body>
+  <main class="today-main" style="margin-top: 4vh">
+    <!-- Луна сегодня -->
+    <section class="luna-card">
+      <p class="text-xs tracking-widest uppercase luna-accent">Сегодня</p>
+      <h1 class="luna-title text-xl mt-1" id="moon-title">…</h1>
+      <div class="flex gap-6 mt-3 text-sm">
+        <div><span class="text-[#8a8a9a]">Лунный день:</span> <span id="lunar-day" class="luna-title">—</span></div>
+        <div><span class="text-[#8a8a9a]">Освещённость:</span> <span id="illumination" class="luna-title">—</span></div>
+      </div>
+      <a href="/natal" class="inline-block mt-3 text-sm luna-accent no-underline">✨ Натальная карта →</a>
+      <a href="/spreads" class="inline-block mt-3 ml-4 text-sm luna-accent no-underline">🃏 Расклады →</a>
+      <a href="/mac" class="inline-block mt-3 ml-4 text-sm luna-accent no-underline">🧩 МАК →</a>
+      <a href="/journal" class="inline-block mt-3 ml-4 text-sm luna-accent no-underline">📖 Дневник →</a>
+      <a href="/profile" class="inline-block mt-3 ml-4 text-sm luna-accent no-underline">👤 Профиль →</a>
+    </section>
+
+    <!-- Камень дня -->
+    <section class="luna-card">
+      <p class="text-xs tracking-widest uppercase luna-accent">Камень дня</p>
+      <p class="luna-title text-lg mt-1"><span id="stone-name">—</span></p>
+      <p class="text-sm text-[#8a8a9a]"><span id="stone-sign"></span> <span id="stone-meaning"></span></p>
+    </section>
+
+    <!-- Карта дня -->
+    <section class="luna-card">
+      <div class="flex items-center justify-between">
+        <p class="text-xs tracking-widest uppercase luna-accent">Карта дня</p>
+        <div class="flex gap-1 text-sm" role="tablist">
+          <button class="luna-btn luna-btn--ghost !py-1.5 !px-3 deck-btn" data-deck="tarot" aria-pressed="true">🔮 Таро</button>
+          <button class="luna-btn luna-btn--ghost !py-1.5 !px-3 deck-btn" data-deck="mac" aria-pressed="false">🧩 МАК</button>
+        </div>
+      </div>
+
+      <div class="drawn-card" id="card-wrap">
+        <div class="drawn-card__inner">
+          <div class="drawn-card__face drawn-card__back"><span class="spiral" aria-hidden="true"></span></div>
+          <div class="drawn-card__face drawn-card__front">
+            <p class="luna-title text-base" id="card-name"></p>
+            <p class="text-xs luna-accent mt-1" id="card-keywords"></p>
+            <p class="text-[11px] text-[#8a8a9a] mt-2" id="card-reversed"></p>
+          </div>
+        </div>
+      </div>
+      <p class="text-center text-xs luna-accent mt-2" id="card-status">Карта ещё скрыта — колода ждёт вашего тапа</p>
+
+      <div id="card-interpretation" class="hidden mt-3 text-sm space-y-2">
+        <p><span class="luna-accent">Значение:</span> <span id="card-meaning"></span></p>
+        <p><span class="luna-accent">Вопрос для рефлексии:</span> <span id="card-question"></span></p>
+      </div>
+
+      <div id="ai-interpretation" class="hidden mt-4 pt-3 border-t border-[#8a8a9a]/20 text-sm space-y-2">
+        <p class="text-xs tracking-widest uppercase luna-accent">Трактовка Лун</p>
+        <p class="luna-title" id="ai-day-message"></p>
+        <p><span class="luna-accent">Энергия дня:</span> <span id="ai-energy"></span></p>
+        <p><span class="luna-accent">Подарок дня:</span> <span id="ai-opportunity"></span></p>
+        <p><span class="luna-accent">Предостережение:</span> <span id="ai-warning"></span></p>
+        <p class="italic luna-accent" id="ai-affirmation"></p>
+      </div>
+
+      <button id="draw-btn" class="luna-btn w-full mt-4">Тянуть карту</button>
+      <button id="share-btn" class="luna-btn luna-btn--ghost w-full mt-2" disabled>Поделиться 🌙</button>
+    </section>
+  </main>
+
+  <script src="/static/js/tg.js"></script>
+  <script src="/static/js/luna.js"></script>
+  <script>
+    let currentDeck = 'tarot';
+    let lastCard = null;
+    let drawing = false;
+
+    const wrap = document.getElementById('card-wrap');
+    const statusEl = document.getElementById('card-status');
+    const drawBtn = document.getElementById('draw-btn');
+    const interp = document.getElementById('card-interpretation');
+    const aiBox = document.getElementById('ai-interpretation');
+    const shareBtn = document.getElementById('share-btn');
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    function resetToBack(animate) {
+      lastCard = null;
+      interp.classList.add('hidden');
+      aiBox.classList.add('hidden');
+      shareBtn.disabled = true;
+      drawBtn.textContent = 'Тянуть карту';
+      statusEl.textContent = 'Карта ещё скрыта — колода ждёт вашего тапа';
+      if (animate) {
+        wrap.classList.remove('is-flipped');
+        wrap.classList.add('is-shuffling');
+        setTimeout(() => wrap.classList.remove('is-shuffling'), 500);
+      } else {
+        wrap.classList.remove('is-flipped');
+      }
+    }
+
+    document.querySelectorAll('.deck-btn').forEach(btn => btn.addEventListener('click', () => {
+      if (btn.dataset.deck === currentDeck) return;
+      currentDeck = btn.dataset.deck;
+      document.querySelectorAll('.deck-btn').forEach(b =>
+        b.setAttribute('aria-pressed', String(b === btn)));
+      // Смена колоды — карта возвращается в рубашку.
+      resetToBack(true);
+    }));
+
+    drawBtn.addEventListener('click', async () => {
+      if (drawing) return;
+      drawing = true;
+      drawBtn.disabled = true;
+      statusEl.textContent = 'Луна тасует колоду…';
+      wrap.classList.add('is-shuffling');
+      interp.classList.add('hidden');
+      aiBox.classList.add('hidden');
+      shareBtn.disabled = true;
+
+      try {
+        const [res] = await Promise.all([
+          fetch('/api/draw', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...window.lunaHeaders() },
+            body: JSON.stringify({ deck: currentDeck }),
+          }),
+          new Promise(r => setTimeout(r, 1200)), // ритуал тасовки ~1,2 с
+        ]);
+        lastCard = await res.json();
+        wrap.classList.remove('is-shuffling');
+        const title = document.getElementById('card-name');
+        title.textContent = lastCard.title || lastCard.nameRu;
+        document.getElementById('card-keywords').textContent = (lastCard.keywords || []).join(' · ');
+        document.getElementById('card-reversed').textContent = lastCard.reversed ? '↺ Перевёрнутая' : '';
+        const meaning = lastCard.reversed && lastCard.meaningReversed ? lastCard.meaningReversed : (lastCard.meaningUpright || lastCard.metaphor);
+        document.getElementById('card-meaning').textContent = meaning;
+        document.getElementById('card-question').textContent = lastCard.coachingQuestion || (lastCard.guidingQuestions || [])[0] || '—';
+        statusEl.textContent = 'Карта выбрана';
+        wrap.classList.add('is-flipped');
+        interp.classList.remove('hidden');
+        shareBtn.disabled = false;
+        drawBtn.textContent = 'Тянуть другую карту';
+        loadDailyCardAI();
+      } catch (ex) {
+        wrap.classList.remove('is-shuffling');
+        statusEl.textContent = 'Колода выпала из рук — попробуйте ещё раз';
+      } finally {
+        drawing = false;
+        drawBtn.disabled = false;
+      }
+    });
+
+    async function loadDailyCardAI() {
+      const el = aiBox;
+      try {
+        const res = await fetch('/api/daily-card', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...window.lunaHeaders() },
+          body: JSON.stringify({ deck: currentDeck, card_id: lastCard.id, reversed_: !!lastCard.reversed }),
+        });
+        const body = await res.json();
+        const a = body.ai;
+        if (!a) return; // локальный режим без AI — показываем только базовые значения
+        document.getElementById('ai-day-message').textContent = a.dayMessage || '';
+        document.getElementById('ai-energy').textContent = a.energyOfTheDay || '';
+        document.getElementById('ai-opportunity').textContent = a.opportunity || '';
+        document.getElementById('ai-warning').textContent = a.warning || '';
+        document.getElementById('ai-affirmation').textContent = a.affirmation ? '«' + a.affirmation + '»' : '';
+        el.classList.remove('hidden');
+      } catch (ex) { /* AI недоступен — остаёмся на локальной трактовке */ }
+    }
+
+    async function loadMoon() {
+      const bd = localStorage.getItem('luna_birth_date') || '';
+      const res = await fetch('/api/moon' + (bd ? '?birth_date=' + bd : ''));
+      const m = await res.json();
+      document.getElementById('moon-title').textContent = m.emoji + ' ' + m.phase;
+      document.getElementById('lunar-day').textContent = m.lunar_day + '-й';
+      document.getElementById('illumination').textContent = m.illumination + '%';
+      if (m.birthstone && m.birthstone.stone) {
+        document.getElementById('stone-name').textContent = m.birthstone.stone;
+        document.getElementById('stone-sign').textContent = m.birthstone.symbol + ' ' + m.birthstone.sign + ' ·';
+        document.getElementById('stone-meaning').textContent = m.birthstone.meaning;
+      }
+    }
+
+    document.getElementById('share-btn').addEventListener('click', () => {
+      if (!lastCard) return;
+      if (window.LUNA_TG && window.LUNA_TG.HapticFeedback) {
+        window.LUNA_TG.HapticFeedback.impactOccurred('light');
+      }
+      const name = lastCard.title || lastCard.nameRu || '';
+      const quote = document.getElementById('ai-day-message').textContent
+        || (lastCard.reversed && lastCard.meaningReversed ? lastCard.meaningReversed : (lastCard.meaningUpright || lastCard.metaphor || ''));
+      const text = '✨ Моя карта дня в LUNA AI: ' + name + ' 🌙\n\n«' + quote + '»';
+      window.lunaShare('Поделиться картой дня', text, location.origin);
+    });
+
+    loadMoon().catch(() => {});
+  </script>
+</body>
+</html>

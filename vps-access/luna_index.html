@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>LUNA AI — знакомство</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/luna.css" />
+</head>
+<body>
+  <main class="luna-card" style="margin-top: 8vh">
+    <p class="text-sm tracking-widest uppercase luna-accent">LUNA AI</p>
+    <h1 class="luna-title text-2xl mt-2 mb-1">Добро пожаловать, Искатель</h1>
+    <p class="text-sm text-[#8a8a9a] mb-6">Немного данных — и Луна подберёт для вас карту дня.</p>
+
+    <form id="onboarding-form" class="space-y-4" novalidate>
+      <label class="flex items-start gap-3 text-sm cursor-pointer">
+        <input type="checkbox" id="consent" class="luna-consent mt-0.5 accent-violet-500" />
+        <span>Я даю согласие на обработку персональных данных и принимаю
+          <a href="/policy" class="underline">политику конфиденциальности</a>.</span>
+      </label>
+      <p id="consent-error" class="luna-field-error">Нужно твоё согласие, чтобы Луна сохранила данные 🌙</p>
+
+      <div>
+        <label class="block text-xs text-[#8a8a9a] mb-1" for="birth_date">Дата рождения *</label>
+        <input class="luna-input" type="date" id="birth_date" name="birth_date" />
+        <p id="birth_date-error" class="luna-field-error">Укажи дату рождения — без неё не посчитаю карту</p>
+      </div>
+
+      <div>
+        <label class="block text-xs text-[#8a8a9a] mb-1" for="birth_time">Время рождения (необязательно)</label>
+        <input class="luna-input" type="time" id="birth_time" name="birth_time" />
+      </div>
+
+      <div>
+        <label class="block text-xs text-[#8a8a9a] mb-1" for="city">Город (необязательно)</label>
+        <input class="luna-input" type="text" id="city" name="city" placeholder="Москва" />
+      </div>
+
+      <button type="submit" class="luna-btn w-full" id="submit-btn">Продолжить ✨</button>
+      <p id="error" class="text-sm text-red-400 hidden"></p>
+    </form>
+  </main>
+
+  <script src="/static/js/tg.js"></script>
+  <script>
+    function showFieldError(id, el) {
+      const msg = document.getElementById(id + '-error');
+      msg.classList.add('is-visible');
+      if (el) {
+        el.classList.add('is-invalid');
+        el.classList.remove('luna-shake');
+        void el.offsetWidth;
+        el.classList.add('luna-shake');
+      }
+    }
+    function clearErrors() {
+      document.querySelectorAll('.luna-field-error').forEach(m => m.classList.remove('is-visible'));
+      document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    }
+document.getElementById('onboarding-form').addEventListener('submit', async (e) => {
+      const consent = document.getElementById('consent');
+      const bd = document.getElementById('birth_date');
+      if (!consent.checked) { showFieldError('consent', consent); return; }
+      if (!bd.value) { showFieldError('birth_date', bd); bd.focus(); return; }
+      const btn = document.getElementById('submit-btn');
+      const err = document.getElementById('error');
+      err.classList.add('hidden');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...window.lunaHeaders() },
+          body: JSON.stringify({
+            birth_date: bd.value || null,
+            birth_time: document.getElementById('birth_time').value || null,
+            city: document.getElementById('city').value || null,
+            consent: consent.checked,
+          }),
+        });
+        if (!res.ok) throw new Error((await res.json()).detail || 'Ошибка сохранения');
+        localStorage.setItem('luna_birth_date', bd.value);
+        location.href = '/today';
+      } catch (ex) {
+        err.textContent = ex.message;
+        err.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    });</script>
+</body>
+</html>
